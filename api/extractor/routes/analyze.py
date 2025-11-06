@@ -49,7 +49,7 @@ def _analyze_free_core(title: str | None, body: str, fetched_at_iso: str | None,
         "features_v1": {"lang":(lang or ""),"words":words,"urls":urls,"numbers":nums,"bangs":bangs,"freshness_score_raw":s_fresh}
     }
 
-@app.post("/analyze_free")
+@router.post("/analyze_free")
 def analyze_free(req: AnalyzeReq):
     res = _analyze_free_core(req.title, req.body, req.fetched_at, req.lang)
     if "error" in res:

@@ -24,6 +24,7 @@ RUN pip install --upgrade pip \
 
 # アプリ本体
 COPY app.py /app/app.py
+COPY routes /app/routes
 
 EXPOSE 8080
 

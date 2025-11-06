@@ -1,9 +1,10 @@
-from typing import Optional
-from fastapi import APIRouter, HTTPException
-import httpx
-import trafilatura
+from typing import Optional, List
+from fastapi import APIRouter, HTTPException, Query, Body
+from pydantic import BaseModel
+import httpx, trafilatura, json, hashlib
 from readability import Document
-import json
+import lxml.html
+from urllib.parse import urlparse
 
 router = APIRouter()
 
@@ -109,7 +110,7 @@ def _extract(html: bytes, base_url: str, with_metadata: bool):
     return None
 
 # ---------- endpoints ----------
-@app.get("/extract")
+@router.get("/extract")
 def extract_get(
     url: str = Query(..., description="Target URL"),
     timeout_sec: int = 15,
@@ -133,11 +134,11 @@ def extract_get(
     except Exception as e:
         raise HTTPException(500, f"Internal error: {e}")
 
-@app.post("/extract")
+@router.post("/extract")
 def extract_post(req: ExtractRequest):
     return extract_get(req.url, req.timeout_sec, req.with_metadata)
 
-@app.post("/batch")
+@router.post("/batch")
 def batch(
     urls: list[str] = Body(..., embed=True, description="List of URLs"),
     timeout_sec: int = 15,
