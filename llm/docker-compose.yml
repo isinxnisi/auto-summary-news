@@ -1,0 +1,40 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    environment:
+      - TZ=Asia/Tokyo
+      # 軽量運用前提の既定値（必要に応じて調整）
+      - OLLAMA_MAX_LOADED_MODELS=1
+      # - OLLAMA_KEEP_ALIVE=10m
+      # - OLLAMA_HOST=0.0.0.0
+    volumes:
+      # モデルとキャッシュを永続化
+      - /srv/ollama:/root/.ollama
+    ports:
+      # ローカル確認用。外出し不要なら削除可
+      - "11434:11434"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:11434/api/tags >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+    networks:
+      - edge
+    restart: unless-stopped
+
+  # 任意：Ollamaを単体公開する Cloudflare Tunnel（別トークンを推奨）
+  cloudflared-ollama:
+    image: cloudflare/cloudflared:latest
+    depends_on:
+      - ollama
+    command: ["tunnel","--no-autoupdate","run","--token","${CF_TUNNEL_TOKEN_OLLAMA}"]
+    networks:
+      - edge
+    restart: unless-stopped
+
+networks:
+  edge:
+    external: true
+    name: edge
+
