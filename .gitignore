@@ -1,0 +1,19 @@
+# runtime / secrets
+.env
+docker-compose.override.yml
+secrets/
+*.key
+*.pem
+
+# n8n runtime
+/srv/
+.n8n/
+/logs/
+/backups/
+/files/
+/data/
+
+# Python キャッシュ
+**/__pycache__/
+*.py[cod]
+
