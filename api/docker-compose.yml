@@ -1,0 +1,22 @@
+services:
+  extractor:
+    # 既存の本文API（FastAPI）
+    # Dockerfile は /app を 8080 で listen
+    build:
+      context: ./extractor
+    image: local/text-extractor:0.1
+    container_name: text-extractor
+    environment:
+      - TZ=Asia/Tokyo
+    # 内部専用: ポート公開しない（n8n から http://extractor:8080 で到達）
+    expose:
+      - "8080"
+    restart: unless-stopped
+    networks:
+      - edge
+
+networks:
+  edge:
+    external: true
+    name: edge
+

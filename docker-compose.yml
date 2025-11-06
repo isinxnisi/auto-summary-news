@@ -1,0 +1,121 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: n8n
+      POSTGRES_PASSWORD: n8npass
+      POSTGRES_DB: n8n
+      TZ: Asia/Tokyo
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U n8n -d n8n"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - /srv/n8n/postgres:/var/lib/postgresql/data
+    networks:
+      - internal
+    restart: unless-stopped
+
+  n8n:
+    image: n8nio/n8n:latest
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_DATABASE: n8n
+      DB_POSTGRESDB_USER: n8n
+      DB_POSTGRESDB_PASSWORD: n8npass
+
+      # 外向けURL（固定）
+      N8N_HOST: n8n.isinxnisi.com
+      N8N_PORT: 5678
+      N8N_PROTOCOL: https
+      N8N_WEBHOOK_URL: https://n8n.isinxnisi.com
+      WEBHOOK_URL: https://n8n.isinxnisi.com
+      N8N_EDITOR_BASE_URL: https://n8n.isinxnisi.com
+      N8N_PROXY_HOPS: "1"        # プロキシ1段なら1
+      N8N_TRUST_PROXY: "true"    # 併用推奨（バージョン依存の改善報告あり）
+
+      # セキュリティ方針：Codeノードから環境変数を読まない（推奨）
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: "true"
+      # もし Codeノードや式で env を読む必要がある運用ならこちら
+      # N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"
+      # Gitノードでベアリポを使っていないなら true を明示（推奨）
+      N8N_GIT_NODE_DISABLE_BARE_REPOS: "true"
+
+      # 推奨フラグ
+      N8N_RUNNERS_ENABLED: "true"
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "true"
+      GENERIC_TIMEZONE: Asia/Tokyo
+      TZ: Asia/Tokyo
+
+      # 暗号鍵（必ず長いランダム文字列）
+      N8N_ENCRYPTION_KEY: "あなたの長いランダム文字列"
+
+    ports:
+      - "5678:5678"
+    volumes:
+      - /srv/n8n/data:/home/node/.n8n
+      - /srv/n8n/files:/files
+      - /srv/n8n/backups:/backups
+      - /srv/n8n/logs:/var/log/n8n
+    networks:
+      - edge
+      - internal
+    restart: unless-stopped
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    depends_on:
+      - n8n
+    command: ["tunnel","--no-autoupdate","run","--token","${CF_TUNNEL_TOKEN}"]
+    networks:
+      - edge
+    restart: unless-stopped
+
+  # # --- ここから先は将来の拡張（必要になったら profiles で有効化） ---
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: news-redis
+  #   profiles: ["queue"]
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redisdata:/data
+
+  # rq-worker:
+  #   # 同じ extractor イメージを使い、RQ/Celery ワーカー専用起動に切り替える想定
+  #   build:
+  #     context: ./extractor
+  #     dockerfile: Dockerfile
+  #   container_name: news-rq-worker
+  #   command: ["python", "worker_rq.py"]    # 後日追加
+  #   environment:
+  #     TZ: Asia/Tokyo
+  #     REDIS_URL: redis://redis:6379/0
+  #     FASTTEXT_MODEL: /models/lid.176.bin
+  #     SUDACHI_DICT:   /models/sudachi
+  #   depends_on:
+  #     - redis
+  #   volumes:
+  #     - extractor_models:/models
+  #   profiles: ["queue"]
+
+volumes:
+  pgdata:
+  n8n_data:
+
+# DELTA: edge を外部化（api 側 compose と共有するため）
+networks:
+  edge:
+    external: true
+    name: edge
+    driver: bridge
+  internal:
+    driver: bridge
+    internal: true
+
