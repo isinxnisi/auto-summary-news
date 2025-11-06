@@ -11,7 +11,7 @@ except Exception as ex:
     ARGOS_AVAILABLE = False
     _argos_import_error = str(ex)
 
-mt_router = APIRouter(prefix="/mt", tags=["mt"])
+router = APIRouter(prefix="/mt", tags=["mt"])
 
 # モデル保存先（永続化推奨）：docker-compose の volume に合わせてもOK
 ARGOS_MODEL_DIR = os.getenv("ARGOS_MODEL_DIR", "/models/argos")
@@ -124,7 +124,7 @@ class MTResponse(BaseModel):
     engine: str = "argos"
     elapsed_ms: int
 
-@mt_router.post("", response_model=MTResponse)
+@router.post("", response_model=MTResponse)
 def mt_translate(req: MTRequest):
     if not ARGOS_AVAILABLE:
         raise HTTPException(status_code=500, detail=f"Argos not available: {_argos_import_error}")
@@ -142,7 +142,7 @@ def mt_translate(req: MTRequest):
     return MTResponse(translated_text=out, elapsed_ms=dt)
 
 
-@mt_router.get("/models")
+@router.get("/models")
 def mt_models():
     if not ARGOS_AVAILABLE:
         raise HTTPException(status_code=500, detail=f"Argos not available: {_argos_import_error}")
