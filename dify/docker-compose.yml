@@ -44,6 +44,12 @@ services:
     environment:
       # DATABASE_URL を直接指定した場合はそちらを優先（パスワードに @/: などを含む場合はURLエンコード必須）
       DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg2://${POSTGRES_USER:-dify}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-dify}}
+      # 互換: 明示のDBパラメータ（バージョン差対策）
+      DB_USERNAME: ${POSTGRES_USER:-dify}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: ${POSTGRES_DB:-dify}
       REDIS_URL: redis://redis:6379/0
       STORAGE_TYPE: s3
       S3_ENDPOINT: http://minio:9000
@@ -97,6 +103,11 @@ services:
     environment:
       # 上と同様に DATABASE_URL を優先
       DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg2://${POSTGRES_USER:-dify}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-dify}}
+      DB_USERNAME: ${POSTGRES_USER:-dify}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: ${POSTGRES_DB:-dify}
       REDIS_URL: redis://redis:6379/0
       STORAGE_TYPE: s3
       S3_ENDPOINT: http://minio:9000
@@ -130,6 +141,11 @@ services:
       - postgres
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg2://${POSTGRES_USER:-dify}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-dify}}
+      DB_USERNAME: ${POSTGRES_USER:-dify}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: ${POSTGRES_DB:-dify}
       REDIS_URL: redis://redis:6379/0
       STORAGE_TYPE: s3
       S3_ENDPOINT: http://minio:9000
