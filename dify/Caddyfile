@@ -4,8 +4,8 @@
 :8080 {
   encode zstd gzip
 
-  # Route API first
-  handle_path /console/api/* {
+  # Route API first (preserve full path)
+  handle /console/api/* {
     reverse_proxy http://dify-api:5001 {
       header_up Host {host}
     }
@@ -16,4 +16,3 @@
     header_up Host {host}
   }
 }
-
