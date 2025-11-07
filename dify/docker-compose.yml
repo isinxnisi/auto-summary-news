@@ -217,9 +217,23 @@ services:
   cloudflared-dify:
     image: cloudflare/cloudflared:latest
     depends_on:
-      - dify-web
+      - caddy
     command: ["tunnel","--no-autoupdate","run","--token","${CF_TUNNEL_TOKEN_DIFY}"]
     networks: [edge]
+    restart: unless-stopped
+
+  # Reverse proxy to unify Web+API under one host (solve CSRF)
+  caddy:
+    image: caddy:2
+    container_name: dify-caddy
+    environment:
+      - TZ=Asia/Tokyo
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    # Optional local test port (commented by default)
+    # ports:
+    #   - "8088:8080"
+    networks: [edge, dify-internal]
     restart: unless-stopped
 
 volumes:
