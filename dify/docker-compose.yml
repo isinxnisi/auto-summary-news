@@ -1,0 +1,195 @@
+services:
+  postgres:
+    image: postgres:14
+    container_name: dify-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-dify}
+      POSTGRES_USER: ${POSTGRES_USER:-dify}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      TZ: Asia/Tokyo
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks: [edge]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7
+    container_name: dify-redis
+    command: ["redis-server","--save","","--appendonly","no"]
+    networks: [edge]
+    volumes:
+      - redisdata:/data
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:latest
+    container_name: dify-minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+      TZ: Asia/Tokyo
+    command: ["server","/data","--console-address",":9001"]
+    volumes:
+      - miniodata:/data
+    networks: [edge]
+    restart: unless-stopped
+
+  dify-api:
+    image: langgenius/dify-api:latest
+    container_name: dify-api
+    depends_on:
+      - postgres
+      - redis
+      - minio
+    environment:
+      # DATABASE_URL を直接指定した場合はそちらを優先（パスワードに @/: などを含む場合はURLエンコード必須）
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg2://${POSTGRES_USER:-dify}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-dify}}
+      REDIS_URL: redis://redis:6379/0
+      STORAGE_TYPE: s3
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      S3_SECRET_KEY: ${MINIO_SECRET_KEY}
+      S3_BUCKET_NAME: dify
+      S3_REGION: us-east-1
+      S3_USE_SSL: "false"
+      # ---- Vector store (choose via .env) ----
+      VECTOR_STORE: ${VECTOR_STORE:-qdrant}
+      # Qdrant
+      QDRANT_URL: ${QDRANT_URL:-http://qdrant:6333}
+      QDRANT_API_KEY: ${QDRANT_API_KEY:-}
+      # Weaviate
+      WEAVIATE_ENDPOINT: ${WEAVIATE_ENDPOINT:-http://weaviate:8080}
+      WEAVIATE_API_KEY: ${WEAVIATE_API_KEY:-}
+      SECRET_KEY: ${SECRET_KEY}
+      TZ: Asia/Tokyo
+    networks: [edge]
+    ports:
+      - "5001:5001"
+    restart: unless-stopped
+
+  dify-web:
+    image: langgenius/dify-web:latest
+    container_name: dify-web
+    depends_on:
+      - dify-api
+    environment:
+      API_URL: http://dify-api:5001
+      TZ: Asia/Tokyo
+    networks: [edge]
+    ports:
+      - "3002:3000"
+    restart: unless-stopped
+
+  dify-worker:
+    image: langgenius/dify-api:latest
+    container_name: dify-worker
+    depends_on:
+      - dify-api
+      - redis
+      - postgres
+    environment:
+      # 上と同様に DATABASE_URL を優先
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg2://${POSTGRES_USER:-dify}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-dify}}
+      REDIS_URL: redis://redis:6379/0
+      STORAGE_TYPE: s3
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      S3_SECRET_KEY: ${MINIO_SECRET_KEY}
+      S3_BUCKET_NAME: dify
+      S3_REGION: us-east-1
+      S3_USE_SSL: "false"
+      # ---- Vector store (choose via .env) ----
+      VECTOR_STORE: ${VECTOR_STORE:-qdrant}
+      # Qdrant
+      QDRANT_URL: ${QDRANT_URL:-http://qdrant:6333}
+      QDRANT_API_KEY: ${QDRANT_API_KEY:-}
+      # Weaviate
+      WEAVIATE_ENDPOINT: ${WEAVIATE_ENDPOINT:-http://weaviate:8080}
+      WEAVIATE_API_KEY: ${WEAVIATE_API_KEY:-}
+      SECRET_KEY: ${SECRET_KEY}
+      TZ: Asia/Tokyo
+    command: ["bash","-lc","celery -A celery_worker.celery worker --loglevel=INFO --concurrency=2 -Q compute,storage,default,others"]
+    networks: [edge]
+    restart: unless-stopped
+
+  # Scheduler (periodic tasks)
+  dify-scheduler:
+    image: langgenius/dify-api:latest
+    container_name: dify-scheduler
+    depends_on:
+      - dify-api
+      - redis
+      - postgres
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg2://${POSTGRES_USER:-dify}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-dify}}
+      REDIS_URL: redis://redis:6379/0
+      STORAGE_TYPE: s3
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      S3_SECRET_KEY: ${MINIO_SECRET_KEY}
+      S3_BUCKET_NAME: dify
+      S3_REGION: us-east-1
+      S3_USE_SSL: "false"
+      VECTOR_STORE: ${VECTOR_STORE:-qdrant}
+      QDRANT_URL: ${QDRANT_URL:-http://qdrant:6333}
+      QDRANT_API_KEY: ${QDRANT_API_KEY:-}
+      WEAVIATE_ENDPOINT: ${WEAVIATE_ENDPOINT:-http://weaviate:8080}
+      WEAVIATE_API_KEY: ${WEAVIATE_API_KEY:-}
+      SECRET_KEY: ${SECRET_KEY}
+      TZ: Asia/Tokyo
+    command: ["bash","-lc","celery -A celery_worker.celery beat --loglevel=INFO"]
+    networks: [edge]
+    restart: unless-stopped
+
+  # Vector DB: Qdrant (軽量・既定)
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: dify-qdrant
+    volumes:
+      - qdrantdata:/qdrant/storage
+    environment:
+      TZ: Asia/Tokyo
+    networks: [edge]
+    ports:
+      - "6333:6333"
+    restart: unless-stopped
+
+  # Vector DB: Weaviate（試用時のみ。有効化は COMPOSE_PROFILES=weaviate）
+  weaviate:
+    image: semitechnologies/weaviate:1.24.6
+    container_name: dify-weaviate
+    profiles: ["weaviate"]
+    environment:
+      QUERY_DEFAULTS_LIMIT: "25"
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: "true"
+      PERSISTENCE_DATA_PATH: "/var/lib/weaviate"
+      ENABLE_MODULES: ""
+      CLUSTER_HOSTNAME: "node1"
+      TZ: Asia/Tokyo
+    volumes:
+      - weaviatedata:/var/lib/weaviate
+    networks: [edge]
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+  # Cloudflare Tunnel for Dify (任意)
+  cloudflared-dify:
+    image: cloudflare/cloudflared:latest
+    depends_on:
+      - dify-web
+    command: ["tunnel","--no-autoupdate","run","--token","${CF_TUNNEL_TOKEN_DIFY}"]
+    networks: [edge]
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  redisdata:
+  miniodata:
+  qdrantdata:
+  weaviatedata:
+
+networks:
+  edge:
+    external: true
+    name: edge
