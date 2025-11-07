@@ -52,6 +52,8 @@ services:
       S3_BUCKET_NAME: dify
       S3_REGION: us-east-1
       S3_USE_SSL: "false"
+      # Webのオリジン（CORS/CSRF判定に使用）
+      CONSOLE_WEB_URL: ${CONSOLE_WEB_URL:-http://dify-web:3000}
       # ---- Vector store (choose via .env) ----
       VECTOR_STORE: ${VECTOR_STORE:-qdrant}
       # Qdrant
@@ -73,9 +75,12 @@ services:
     depends_on:
       - dify-api
     environment:
-      # 外部公開で使う場合は .env の API_URL を https://dify-api.<your-domain> に設定してください。
-      # 未設定時は内部URLを既定とします。
+      # 外部公開時は .env に外向けAPI URLを設定してください。
+      # Dify Web が参照するAPIベースURL（優先）
+      CONSOLE_API_URL: ${CONSOLE_API_URL:-http://dify-api:5001}
+      # 互換用（一部バージョンで参照）
       API_URL: ${API_URL:-http://dify-api:5001}
+      NEXT_PUBLIC_API_BASE_URL: ${CONSOLE_API_URL:-http://dify-api:5001}
       TZ: Asia/Tokyo
     networks: [edge]
     ports:
