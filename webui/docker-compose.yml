@@ -1,0 +1,36 @@
+services:
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    environment:
+      # 既存のOllama（llm compose）へ接続
+      - OLLAMA_BASE_URL=http://ollama:11434
+      # 認証を簡略化したい場合は false（必要に応じて切替）
+      # - WEBUI_AUTH=false
+      - TZ=Asia/Tokyo
+    ports:
+      # ローカル確認用（不要なら削除）
+      - "3001:8080"
+    volumes:
+      - webui_data:/app/backend/data
+    networks:
+      - edge
+    restart: unless-stopped
+
+  cloudflared-webui:
+    image: cloudflare/cloudflared:latest
+    depends_on:
+      - open-webui
+    # WebUI 用の別トンネル（Zero Trust ダッシュボードで発行したトークンを使用）
+    command: ["tunnel","--no-autoupdate","run","--token","${CF_TUNNEL_TOKEN_WEBUI}"]
+    networks:
+      - edge
+    restart: unless-stopped
+
+volumes:
+  webui_data:
+
+networks:
+  edge:
+    external: true
+    name: edge
