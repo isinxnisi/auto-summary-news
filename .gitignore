@@ -13,7 +13,16 @@ secrets/
 /files/
 /data/
 
+# Ollama models (local LLM)
+/llm/ollama-data/
+
+# Large local model assets (do not commit)
+/llm/models/**/*.gguf
+/llm/models/**/*.safetensors
+/llm/models/**/*.bin
+/llm/models/**/*.pt
+/llm/models/**/downloads/
+
 # Python キャッシュ
 **/__pycache__/
 *.py[cod]
-
