@@ -264,23 +264,23 @@ services:
     environment:
       TZ: Asia/Tokyo
 
-      # listen ポート（API/WEB からは http://dify-plugin:5002 で叩く）
+      # HTTP API (Dify から叩かれるポート)
       SERVER_PORT: 5002
 
-      # Daemon 側シークレット（API/WEB と共有）
+      # Dify → plugin-daemon の認証キー
       SERVER_KEY: ${SERVICE_API_KEY}
 
-      # Dify API (内部)
+      # plugin-daemon → Dify API の認証キー
       DIFY_INNER_API_URL: http://dify-api:5001
       DIFY_INNER_API_KEY: ${SERVICE_API_KEY}
 
-      # Redis（ジョブ・キュー管理）
+      # Redis（ジョブ管理）
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ""
       REDIS_DB: 0
 
-      # Plugin 用 DB（既存 Postgres を使う）
+      # plugin 用 DB
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USERNAME: ${POSTGRES_USER:-dify}
@@ -288,17 +288,17 @@ services:
       DB_DATABASE: dify_plugin
       DB_SSL_MODE: disable
 
-      # ストレージ設定（ローカルでOK）
+      # ローカルストレージ
       PLUGIN_STORAGE_TYPE: local
       PLUGIN_STORAGE_LOCAL_ROOT: /app/storage
       PLUGIN_INSTALLED_PATH: plugin
       PLUGIN_WORKING_PATH: cwd
-      PLUGIN_REMOTE_INSTALLING_SCHEME: ${PLUGIN_REMOTE_INSTALLING_SCHEME:-http}
-      PLUGIN_REMOTE_INSTALLING_HOST: ${PLUGIN_REMOTE_INSTALLING_HOST:-0.0.0.0}
-      PLUGIN_REMOTE_INSTALLING_PORT: ${PLUGIN_REMOTE_INSTALLING_PORT:-5003}
       PERSISTENCE_STORAGE_PATH: /app/persistence
 
-    # 必要なら: PYTHON_INTERPRETER_PATH=/usr/bin/python3
+      # Marketplace からダウンロードするための自分自身の公開 URL
+      PLUGIN_REMOTE_INSTALLING_HOST: ${PLUGIN_REMOTE_INSTALLING_HOST}
+      PLUGIN_REMOTE_INSTALLING_PORT: ${PLUGIN_REMOTE_INSTALLING_PORT}
+      PLUGIN_REMOTE_INSTALLING_SCHEME: ${PLUGIN_REMOTE_INSTALLING_SCHEME}
 
     volumes:
       - dify-plugin-data:/app
