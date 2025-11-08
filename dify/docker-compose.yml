@@ -42,8 +42,6 @@ services:
       - redis
       - minio
     environment:
-      # DATABASE_URL を直接指定した場合はそちらを優先（パスワードに @/: などを含む場合はURLエンコード必須）
-      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg2://${POSTGRES_USER:-dify}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-dify}}
       # 互換: 明示のDBパラメータ（バージョン差対策）
       DB_USERNAME: ${POSTGRES_USER:-dify}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
@@ -113,8 +111,6 @@ services:
       - redis
       - postgres
     environment:
-      # 上と同様に DATABASE_URL を優先
-      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg2://${POSTGRES_USER:-dify}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-dify}}
       DB_USERNAME: ${POSTGRES_USER:-dify}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       DB_HOST: postgres
@@ -160,7 +156,6 @@ services:
       - redis
       - postgres
     environment:
-      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg2://${POSTGRES_USER:-dify}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-dify}}
       DB_USERNAME: ${POSTGRES_USER:-dify}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       DB_HOST: postgres
@@ -231,23 +226,74 @@ services:
     networks: [edge]
     restart: unless-stopped
 
+  # One-shot: create plugin DB if missing (makes stack self-contained)
+  plugin-db-init:
+    image: postgres:14
+    container_name: dify-plugin-db-init
+    networks: [dify-internal]
+    depends_on:
+      - postgres
+    environment:
+      PGHOST: postgres
+      PGUSER: ${POSTGRES_USER:-dify}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+    command: >
+      bash -lc "
+        until pg_isready -h $PGHOST -U $PGUSER -q; do sleep 1; done;
+        psql -v ON_ERROR_STOP=1 -h $PGHOST -U $PGUSER -tc \"SELECT 1 FROM pg_database WHERE datname='dify_plugin'\" | grep -q 1 || \
+        psql -v ON_ERROR_STOP=1 -h $PGHOST -U $PGUSER -c \"CREATE DATABASE dify_plugin\";
+      "
+    restart: "no"
+
   # Plugin daemon (Marketplace / background plugin tasks)
   dify-plugin:
     image: langgenius/dify-plugin-daemon:0.4.0-local
     container_name: dify-plugin
     depends_on:
-      - dify-api
-      - redis
+      dify-api:
+        condition: service_started
+      redis:
+        condition: service_started
+      plugin-db-init:
+        condition: service_completed_successfully
     environment:
       TZ: Asia/Tokyo
-      # Dify API(内部向けURL)
-      SERVICE_API_URL: http://dify-api:5001
-      # API側と共通のキー
-      SERVICE_API_KEY: ${SERVICE_API_KEY}
-      # Redis (ジョブ管理などに使用)
-      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
-      # Daemon が listen するポート
-      PLUGIN_DAEMON_PORT: 5002
+
+      # listen ポート（API/WEB からは http://dify-plugin:5002 で叩く）
+      SERVER_PORT: 5002
+
+      # Daemon 側シークレット（API/WEB と共有）
+      SERVER_KEY: ${SERVICE_API_KEY}
+
+      # Dify API (内部)
+      DIFY_INNER_API_URL: http://dify-api:5001
+      DIFY_INNER_API_KEY: ${SERVICE_API_KEY}
+
+      # Redis（ジョブ・キュー管理）
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ""
+      REDIS_DB: 0
+
+      # Plugin 用 DB（既存 Postgres を使う）
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: ${POSTGRES_USER:-dify}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_DATABASE: dify_plugin
+      DB_SSL_MODE: disable
+
+      # ストレージ設定（ローカルでOK）
+      PLUGIN_STORAGE_TYPE: local
+      PLUGIN_STORAGE_LOCAL_ROOT: /app/storage
+      PLUGIN_INSTALLED_PATH: plugin
+      PLUGIN_WORKING_PATH: cwd
+      PERSISTENCE_STORAGE_PATH: /app/persistence
+
+      # 必要なら: PYTHON_INTERPRETER_PATH=/usr/bin/python3
+
+    volumes:
+      - dify-plugin-data:/app
     networks: [edge, dify-internal]
     restart: unless-stopped
 
@@ -271,6 +317,7 @@ volumes:
   miniodata:
   qdrantdata:
   weaviatedata:
+  dify-plugin-data:
 
 networks:
   edge:
