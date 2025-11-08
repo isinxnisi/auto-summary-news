@@ -78,6 +78,7 @@ services:
       # Plugin daemon 認証: daemon と同じキーを設定
       SERVICE_API_KEY: ${SERVICE_API_KEY}
       PLUGIN_DAEMON_URL: http://dify-plugin:5002
+      PLUGIN_DAEMON_KEY: ${SERVICE_API_KEY}
       TZ: Asia/Tokyo
     networks: [edge, dify-internal]
     # ports:
@@ -99,6 +100,7 @@ services:
       # Plugin daemon 認証: daemon と同じキーを設定
       SERVICE_API_KEY: ${SERVICE_API_KEY}
       PLUGIN_DAEMON_URL: http://dify-plugin:5002
+      PLUGIN_DAEMON_KEY: ${SERVICE_API_KEY}
       TZ: Asia/Tokyo
     networks: [edge]
     # ports:
@@ -145,6 +147,7 @@ services:
       # Plugin daemon 認証: daemon と同じキーを設定
       SERVICE_API_KEY: ${SERVICE_API_KEY}
       PLUGIN_DAEMON_URL: http://dify-plugin:5002
+      PLUGIN_DAEMON_KEY: ${SERVICE_API_KEY}
       TZ: Asia/Tokyo
     # 低メモリ環境向けに並列を 1 に設定
     command: ["bash","-lc","celery -A celery_worker.celery worker --loglevel=INFO --concurrency=1 -Q compute,storage,default,others"]
