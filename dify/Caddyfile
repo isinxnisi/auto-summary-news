@@ -12,6 +12,9 @@
       header_up X-Forwarded-Proto https
       header_up X-Forwarded-For {remote}
       header_up X-Real-IP {remote}
+      # Ensure API receives auth/CSRF even if Web doesn't set headers
+      header_up Authorization "Bearer {http.request.cookie.access_token}"
+      header_up X-CSRF-Token "{http.request.cookie.csrf_token}"
     }
   }
 
