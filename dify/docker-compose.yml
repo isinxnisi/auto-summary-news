@@ -75,6 +75,8 @@ services:
       WEAVIATE_ENDPOINT: ${WEAVIATE_ENDPOINT:-http://weaviate:8080}
       WEAVIATE_API_KEY: ${WEAVIATE_API_KEY:-}
       SECRET_KEY: ${SECRET_KEY}
+      # Plugin daemon 認証（任意）: daemon と同じキーを設定
+      SERVICE_API_KEY: ${SERVICE_API_KEY:-}
       TZ: Asia/Tokyo
     networks: [edge, dify-internal]
     ports:
@@ -220,6 +222,24 @@ services:
       - caddy
     command: ["tunnel","--no-autoupdate","run","--token","${CF_TUNNEL_TOKEN_DIFY}"]
     networks: [edge]
+    restart: unless-stopped
+
+  # Plugin daemon (Marketplace / background plugin tasks)
+  dify-plugin:
+    image: langgenius/dify-plugin-daemon:latest
+    container_name: dify-plugin
+    depends_on:
+      - dify-api
+      - redis
+    environment:
+      # Dify API (internal URL)
+      CONSOLE_API_URL: http://dify-api:5001
+      # Redis
+      REDIS_URL: redis://redis:6379/0
+      # APIキー（api側 SERVICE_API_KEY と一致させる）
+      SERVICE_API_KEY: ${SERVICE_API_KEY:-}
+      TZ: Asia/Tokyo
+    networks: [edge, dify-internal]
     restart: unless-stopped
 
   # Reverse proxy to unify Web+API under one host (solve CSRF)
