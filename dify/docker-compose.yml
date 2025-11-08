@@ -79,8 +79,8 @@ services:
       SERVICE_API_KEY: ${SERVICE_API_KEY:-}
       TZ: Asia/Tokyo
     networks: [edge, dify-internal]
-    ports:
-      - "5001:5001"
+    # ports:
+    #   - "5001:5001"
     restart: unless-stopped
 
   dify-web:
@@ -97,8 +97,8 @@ services:
       NEXT_PUBLIC_API_BASE_URL: ${CONSOLE_API_URL:-http://dify-api:5001}
       TZ: Asia/Tokyo
     networks: [edge]
-    ports:
-      - "3002:3000"
+    # ports:
+    #   - "3002:3000"
     restart: unless-stopped
 
   dify-worker:
@@ -192,8 +192,8 @@ services:
     environment:
       TZ: Asia/Tokyo
     networks: [dify-internal]
-    ports:
-      - "6333:6333"
+    # ports:
+    #   - "6333:6333"
     restart: unless-stopped
 
   # Vector DB: Weaviate（試用時のみ。有効化は COMPOSE_PROFILES=weaviate）
@@ -211,8 +211,8 @@ services:
     volumes:
       - weaviatedata:/var/lib/weaviate
     networks: [dify-internal]
-    ports:
-      - "8080:8080"
+    # ports:
+    #   - "8080:8080"
     restart: unless-stopped
 
   # Cloudflare Tunnel for Dify (任意)
