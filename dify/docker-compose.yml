@@ -226,7 +226,7 @@ services:
 
   # Plugin daemon (Marketplace / background plugin tasks)
   dify-plugin:
-    image: langgenius/dify-plugin-daemon:latest
+    image: langgenius/dify-plugin-daemon:0.4.0-local
     container_name: dify-plugin
     depends_on:
       - dify-api
