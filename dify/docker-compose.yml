@@ -293,6 +293,7 @@ services:
       PLUGIN_STORAGE_LOCAL_ROOT: /app/storage
       PLUGIN_INSTALLED_PATH: plugin
       PLUGIN_WORKING_PATH: cwd
+      PLUGIN_REMOTE_INSTALLING_HOST: ${PLUGIN_REMOTE_INSTALLING_HOST}
       PERSISTENCE_STORAGE_PATH: /app/persistence
 
       # 必要なら: PYTHON_INTERPRETER_PATH=/usr/bin/python3
