@@ -1,0 +1,36 @@
+services:
+  aituber:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aituber
+    env_file:
+      - .env
+    environment:
+      # Runtime defaults (can be overridden in .env)
+      - DIFY_URL=${DIFY_URL}
+      - DIFY_API_KEY=${DIFY_API_KEY}
+      - NEXT_PUBLIC_TTS_ENGINE=${NEXT_PUBLIC_TTS_ENGINE:-voicevox}
+      - VOICEVOX_API_URL=${VOICEVOX_API_URL:-http://voicevox:50021}
+    ports:
+      - "3000:3000"
+    depends_on:
+      voicevox:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Optional: local TTS engine (VOICEVOX). Enable by running without changes,
+  # or comment this out if you already run VOICEVOX natively.
+  voicevox:
+    image: voicevox/voicevox_engine:cpu-latest   # ← Docker Hub の公式。これでOK
+    platform: linux/amd64
+    container_name: voicevox
+    ports:
+      - "50021:50021"
+    # 初回はヘルスチェック省略でも可。入れるなら curl で:
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:50021/speakers > /dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped

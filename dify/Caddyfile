@@ -4,6 +4,17 @@
 :8080 {
   encode zstd gzip
 
+  # Route Dify App API (/v1/*) to the API container
+  handle /v1/* {
+    reverse_proxy http://dify-api:5001 {
+      header_up Host {host}
+      header_up X-Forwarded-Host {host}
+      header_up X-Forwarded-Proto https
+      header_up X-Forwarded-For {remote}
+      header_up X-Real-IP {remote}
+    }
+  }
+
   # Route API first (preserve full path)
   handle /console/api/* {
     reverse_proxy http://dify-api:5001 {
