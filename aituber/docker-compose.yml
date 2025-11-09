@@ -18,6 +18,8 @@ services:
       voicevox:
         condition: service_healthy
     restart: unless-stopped
+    networks:
+      - edge
 
   # Optional: local TTS engine (VOICEVOX). Enable by running without changes,
   # or comment this out if you already run VOICEVOX natively.
@@ -34,3 +36,10 @@ services:
       timeout: 5s
       retries: 10
     restart: unless-stopped
+    networks:
+      - edge
+
+networks:
+  edge:
+    external: true
+    name: edge
