@@ -1,40 +1,18 @@
-# Reverse proxy that serves both Web and API from a single host
-# Cloudflare Tunnel should point its Service URL to http://dify-caddy:8080
-
 :8080 {
   encode zstd gzip
 
-  # Route Dify App API (/v1/*) to the API container
+  # App API (/v1/*) → dify-api
   handle /v1/* {
-    reverse_proxy http://dify-api:5001 {
-      header_up Host {host}
-      header_up X-Forwarded-Host {host}
-      header_up X-Forwarded-Proto https
-      header_up X-Forwarded-For {remote}
-      header_up X-Real-IP {remote}
-    }
+    reverse_proxy http://dify-api:5001
   }
 
-  # Route API first (preserve full path)
+  # Console API (/console/api/*) → dify-api
   handle /console/api/* {
-    reverse_proxy http://dify-api:5001 {
-      header_up Host {host}
-      header_up X-Forwarded-Host {host}
-      header_up X-Forwarded-Proto https
-      header_up X-Forwarded-For {remote}
-      header_up X-Real-IP {remote}
-      # Ensure API receives auth/CSRF even if Web doesn't set headers
-      header_up Authorization "Bearer {http.request.cookie.access_token}"
-      header_up X-CSRF-Token "{http.request.cookie.csrf_token}"
-    }
+    reverse_proxy http://dify-api:5001
   }
 
-  # Everything else -> Web
-  reverse_proxy http://dify-web:3000 {
-    header_up Host {host}
-    header_up X-Forwarded-Host {host}
-    header_up X-Forwarded-Proto https
-    header_up X-Forwarded-For {remote}
-    header_up X-Real-IP {remote}
+  # その他（Web UI等） → dify-web
+  handle {
+    reverse_proxy http://dify-web:3000
   }
 }
