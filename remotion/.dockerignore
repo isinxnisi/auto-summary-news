@@ -1,0 +1,10 @@
+app/node_modules
+app/.next
+app/.turbo
+app/.remotion
+app/.cache
+app/dist
+app/build
+**/.DS_Store
+**/Thumbs.db
+**/.git

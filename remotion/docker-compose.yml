@@ -1,0 +1,40 @@
+services:
+  remotion:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: remotion
+    working_dir: /app
+    environment:
+      - TZ=Asia/Tokyo
+      - REMOTION_AUTO_INIT=false
+      - REMOTION_TEMPLATE=blank
+      - REMOTION_LANGUAGE=ts
+      - REMOTION_PACKAGE_MANAGER=npm
+      - REMOTION_APP_DIR=ns-video
+      - PUPPETEER_ARGS=--no-sandbox --disable-dev-shm-usage --disable-gpu --disable-setuid-sandbox
+      - CHOKIDAR_USEPOLLING=true
+      - CHOKIDAR_INTERVAL=300
+      - WATCHPACK_POLLING=true
+      # プロジェクトをサブディレクトリに作る場合は設定（例: my-video）
+      # - REMOTION_APP_DIR=my-video
+    # Remotion アプリを配置する予定のディレクトリをマウント
+    # 例: `n8n-auto/remotion/app` に `npx remotion create` で初期化
+    volumes:
+      - ./app:/app
+    # AITuber と被らないように 3003 に割当
+    ports:
+      - "3003:3000"
+    # Remotion プロジェクト作成後に `package.json` の scripts.start を利用
+    # 例: "start": "remotion preview"
+    command: ["start-remotion"]
+    shm_size: "1gb"
+    networks:
+      - edge
+    restart: unless-stopped
+
+networks:
+  # 既存スタック（n8n / dify / llm 等）と連携できるように共通ネットワークを使用
+  edge:
+    external: true
+    name: edge
