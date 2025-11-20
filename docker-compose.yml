@@ -63,6 +63,8 @@ services:
       - /srv/n8n/files:/files
       - /srv/n8n/backups:/backups
       - /srv/n8n/logs:/var/log/n8n
+      - ./remotion/app/ns-video/public/data/projects:/remotion-projects
+      - ./remotion/app/ns-video/out:/remotion-out
     networks:
       - edge
       - internal
@@ -118,4 +120,3 @@ networks:
   internal:
     driver: bridge
     internal: true
-

@@ -1,0 +1,252 @@
+{
+  "videoId": "newslab-kagaku-0001",
+  "parameter": {
+    "spec": {
+      "fps": 30,
+      "width": 1080,
+      "height": 1920
+    },
+    "meta": {
+      "videoId": "newslab-kagaku-0001",
+      "title": "【ニュースラボ！科学情報部】 生成日時: 2025/11/18 00:42",
+      "date": "2025-11-12T00:00:00+09:00"
+    },
+    "scenes": [
+      {
+        "startFrame": 0,
+        "durationSec": 7.333,
+        "layout": "title",
+        "text": "ジェイムズ・ウェッブ宇宙望遠鏡が250個の若い銀河を見たよ。昔の宇宙の銀河って、どんな形だったと思う？",
+        "audio": {
+          "src": "media/audio/hook.wav",
+          "volume": 1,
+          "startFrom": 0
+        },
+        "transition": {
+          "type": "fade",
+          "duration": 15
+        }
+      },
+      {
+        "startFrame": 0,
+        "durationSec": 4.5,
+        "layout": "outro",
+        "startFrameAuto": true,
+        "text": "チャンネル登録・高評価よろしく！",
+        "yPercent": 0.35,
+        "styleOverride": {
+          "fontSize": 48,
+          "lineHeight": 1.35,
+          "textAlign": "center"
+        },
+        "images": [
+          {
+            "src": "/images/newslab-logo.png",
+            "xPercent": 0.5,
+            "yPercent": 0.5,
+            "widthPercent": 0.76,
+            "dropShadow": "0px 8px 24px rgba(0,0,0,0.35)"
+          }
+        ],
+        "audio": {
+          "src": "/media/audio/voice/newslab-outro-c2.wav",
+          "volume": 1,
+          "startFrom": 0
+        },
+        "transition": {
+          "type": "fade",
+          "in": 12,
+          "out": 12
+        }
+      }
+    ],
+    "captions": [
+      {
+        "frameInAuto": "after-title",
+        "frameOut": 9999,
+        "text": "ジェイムズ・ウェッブ望遠鏡が捉えた、宇宙初期の銀河の混沌とした姿。ジェイムズ・ウェッブ宇宙望遠鏡（JWST）による最新の観測から、宇宙が生まれて間もない頃の若い銀河が、現代の銀河とは大きく異なる姿をしていたことが明らかになりました。初期の銀河は、ガスが秩序なく動き回る混沌とした状態にあったと報告されています。この発見は、銀河がどのようにして現在の安定した姿へと進化していったのかを理解する上で重要な手掛かりとなります。 天文学者たちの観測により、宇宙が誕生して間もない頃の若い銀河の姿が明らかになりました。 … 出典：Science Daily（要約・意訳）",
+        "mode": "ticker"
+      }
+    ],
+    "banners": [
+      {
+        "frameInAuto": "after-title",
+        "frameOut": 9999,
+        "text": "　【解説】科学情報🚀最新ネタ　",
+        "yPercent": 0.125
+      }
+    ],
+    "speeches": [
+      {
+        "frameOutAuto": "after-title",
+        "durationSec": 2,
+        "image": "char.bot",
+        "side": "right",
+        "locked": true,
+        "transition": {
+          "type": "slide-fade",
+          "in": 12,
+          "out": 0,
+          "direction": "right"
+        }
+      },
+      {
+        "frameOutAuto": "after-title",
+        "durationSec": 2,
+        "image": "char.human",
+        "side": "left",
+        "locked": true,
+        "transition": {
+          "type": "slide-fade",
+          "in": 12,
+          "out": 0,
+          "direction": "left"
+        }
+      }
+    ],
+    "scriptGroups": [
+      {
+        "id": "what",
+        "keepStack": true,
+        "gapSec": 0.8,
+        "items": [
+          {
+            "type": "talk",
+            "speaker": "right",
+            "text": "ジェイムズ・ウェッブ宇宙望遠鏡の観測で、ビッグバン後の初期の銀河は、現在の渦巻き銀河とは違い「無秩序で激しい状態」だったことがわかったよ。",
+            "voice": "media/audio/speech01-c1-01.wav",
+            "voiceSec": 8.5
+          },
+          {
+            "type": "talk",
+            "speaker": "left",
+            "text": "宇宙ができたばかりの頃の銀河は、今のきれいな形じゃなくて「ぐちゃぐちゃ」だったんだ。",
+            "voice": "media/audio/speech02-c2-01.wav",
+            "voiceSec": 5.5
+          }
+        ]
+      },
+      {
+        "id": "how",
+        "keepStack": true,
+        "gapSec": 0.8,
+        "items": [
+          {
+            "type": "talk",
+            "speaker": "right",
+            "text": "「NIRCam」という特殊なカメラを使い、「グリズムモード」で電離水素ガスのかすかな光を記録し、銀河内のガスの動きを調べたんだ。",
+            "voice": "media/audio/speech03-c1-02.wav",
+            "voiceSec": 7.5
+          },
+          {
+            "type": "talk",
+            "speaker": "left",
+            "text": "遠い銀河の「ガスがどう動いているか」をじーっと見て調べたんだ。これって、まるで遠い星のダンスを見るみたいだね、どんなダンスだっ",
+            "voice": "media/audio/speech04-c2-02.wav",
+            "voiceSec": 8.5
+          }
+        ]
+      },
+      {
+        "id": "why",
+        "keepStack": true,
+        "gapSec": 0.8,
+        "items": [
+          {
+            "type": "talk",
+            "speaker": "right",
+            "text": "宇宙の進化で銀河はゆっくり安定したけれど、初期には「激しい星形成」と重力でガスがかき混ぜられ、安定して回転できなかったんだ。",
+            "voice": "media/audio/speech05-c1-03.wav",
+            "voiceSec": 7.5
+          },
+          {
+            "type": "talk",
+            "speaker": "left",
+            "text": "たくさんの星が激しく生まれて、大きな力がガスをぐるぐるかき回したから、銀河はうまく回れなかったんだって。",
+            "voice": "media/audio/speech06-c2-03.wav",
+            "voiceSec": 6.5
+          }
+        ]
+      },
+      {
+        "id": "wow",
+        "keepStack": true,
+        "gapSec": 0.8,
+        "items": [
+          {
+            "type": "talk",
+            "speaker": "right",
+            "text": "ビッグバンからたった数億年後の銀河の姿が、ジェイムズ・ウェッブ宇宙望遠鏡で、これまでで「一番はっきり」見えたんだ！",
+            "voice": "media/audio/speech07-c1-04.wav",
+            "voiceSec": 7.5
+          },
+          {
+            "type": "talk",
+            "speaker": "left",
+            "text": "宇宙ができたばかりの頃の銀河の様子が、すっごくよく見えるようになったってこと！",
+            "voice": "media/audio/speech08-c2-04.wav",
+            "voiceSec": 4.5
+          }
+        ]
+      }
+    ],
+    "vars": {
+      "showLogo": true,
+      "chapter": 1,
+      "chatStackFontSize": 54,
+      "hideDuringLayouts": [
+        "outro"
+      ],
+      "noCharacterFade": true,
+      "metaTopPx": 100,
+      "autoSpeechSchedule": {
+        "enable": true,
+        "startFrameAuto": "after-title",
+        "mode": "free",
+        "overlapSec": 0.5,
+        "bufferSec": 0.667,
+        "pairPauseSec": 0,
+        "sequentialFallback": false
+      },
+      "autoExit": {
+        "enable": true,
+        "gapFrames": 0,
+        "durationFrames": 40,
+        "sides": [
+          "left",
+          "right"
+        ],
+        "transition": {
+          "type": "slide-fade",
+          "in": 0,
+          "out": 12
+        }
+      }
+    }
+  },
+  "options": {
+    "render": true,
+    "overwrite": true,
+    "generateAudio": true
+  },
+  "voicePresets": {
+    "left": {
+      "speakerId": 3,
+      "speedScale": 1.3,
+      "pitchScale": 0.02,
+      "intonationScale": 1.0
+    },
+    "right": {
+      "speakerId": 29,
+      "speedScale": 1.3,
+      "pitchScale": 0.02,
+      "intonationScale": 1.0
+    },
+    "hook": {
+      "speakerId": 3,
+      "speedScale": 1.3,
+      "pitchScale": 0.02,
+      "intonationScale": 1.0
+    }
+  }
+}

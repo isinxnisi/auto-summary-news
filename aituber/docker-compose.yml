@@ -13,7 +13,7 @@ services:
       - NEXT_PUBLIC_TTS_ENGINE=${NEXT_PUBLIC_TTS_ENGINE:-voicevox}
       - VOICEVOX_API_URL=${VOICEVOX_API_URL:-http://voicevox:50021}
     ports:
-      - "3000:3000"
+      - "3002:3000"
     depends_on:
       voicevox:
         condition: service_healthy

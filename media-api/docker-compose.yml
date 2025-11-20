@@ -1,0 +1,26 @@
+services:
+  media-api:
+    build:
+      context: .
+    image: local/media-api:0.1
+    container_name: media-api
+    environment:
+      - TZ=Asia/Tokyo
+      - MEDIA_PROJECT_DIR=/media/projects
+      - MEDIA_OUTPUT_DIR=/media/video
+      - VOICEVOX_URL=http://voicevox:50021
+    volumes:
+      - ../remotion/app/ns-video/public/data/projects:/media/projects
+      - ../remotion/app/ns-video/out:/media/video
+      - ./tmp:/tmp
+      - /var/run/docker.sock:/var/run/docker.sock
+    expose:
+      - "8080"
+    networks:
+      - edge
+    restart: unless-stopped
+
+networks:
+  edge:
+    external: true
+    name: edge
