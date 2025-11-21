@@ -603,6 +603,15 @@ async def get_job(job_id: str):
     return _job_summary(job)
 
 
+@app.get("/video-jobs")
+async def list_jobs(status: Optional[JobStatus] = None):
+    async with JOBS_LOCK:
+        values = list(JOBS.values())
+    if status:
+        values = [job for job in values if job.status == status]
+    return [_job_summary(job) for job in values]
+
+
 @app.get("/healthz")
 async def healthz():
     return {"ok": True}
