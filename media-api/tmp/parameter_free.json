@@ -190,9 +190,11 @@
         ]
       }
     ],
+    "bgm": {
+      "src": "bgm.emo-piano"
+    },
     "vars": {
       "showLogo": true,
-      "chapter": 1,
       "chatStackFontSize": 54,
       "hideDuringLayouts": [
         "outro"
